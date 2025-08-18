@@ -1,0 +1,1 @@
+Testes usando Canvas 2D.
