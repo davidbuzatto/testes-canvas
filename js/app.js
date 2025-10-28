@@ -137,7 +137,7 @@ function preparar() {
 
     canvas.addEventListener( "mouseup", event => {
         if ( event.button === 0 ) {
-            if ( bolinhaSelecionada != null ) {
+            if ( bolinhaSelecionada !== null ) {
                 bolinhaSelecionada.emArraste = false;
             }
         } else if ( event.button === 2 ) {
@@ -154,7 +154,7 @@ function preparar() {
     });
 
     canvas.addEventListener( "mouseout", event => {
-        if ( bolinhaSelecionada != null ) {
+        if ( bolinhaSelecionada !== null ) {
             bolinhaSelecionada.emArraste = false;
         }
     });
@@ -216,7 +216,7 @@ function criarBolinha( x, y ) {
 }
 
 function gerarVelocidadeAleatoria( minima, maxima ) {
-    return ( minima + Math.random() * ( maxima - minima ) ) * ( Math.random() < 0.5 ? -1 : 1 )
+    return ( minima + Math.random() * ( maxima - minima ) ) * ( Math.random() < 0.5 ? -1 : 1 );
 }
 
 preparar();
