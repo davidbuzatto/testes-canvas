@@ -1,20 +1,21 @@
 // variáveis globais do módulo
 
-const GRAVIDADE = 1200;
+const GRAVIDADE = 20;     // gravidade da simulação
 
-let ctx;
-let ultimoTempo = 0;
-let delta = 0;
+let ctx;                  // contexto gráfico
+let ultimoTempo = 0;      // tempo antes do próximo frame
+let delta = 0;            // variação do tempo
 
-let bolinhas = [];
-let bolinhaSelecionada;
-let largura;
-let altura;
+let bolinhas = [];        // array de bolinhas criadas
+let bolinhaSelecionada;   // a bolinha que está selecionada no momento
+let largura;              // largura do canvas
+let altura;               // altura do canvas
 
-let isMouseDown = false;
-let mouseX;
-let mouseY;
+let isMouseDown = false;  // se o mouse ainda está pressionado
+let mouseX;               // posição x do mouse
+let mouseY;               // posição y do mouse
 
+// classe da bolinha
 class Bolinha {
 
     constructor( x, y, raio, vx, vy, cor ) {
@@ -43,14 +44,18 @@ class Bolinha {
 
     }
 
-    // delta é a variação do tempo em segundos entre um quadro e outro
+    // atualiza o estado da bolinha. delta é a variação do tempo em segundos
+    // entre um quadro e outro
     atualizar( delta ) {
 
+        // se não está sendo arrastada
         if ( !this.emArraste ) {
-
+            
+            // atualiza a posição baseado na velocidade
             this.x += this.vx * delta;
             this.y += this.vy * delta;
 
+            // verifica colisão com as laterais (horizontal)
             if ( this.x - this.raio < 0 ) {
                 this.x = this.raio;
                 this.vx = -this.vx * this.elasticidade;
@@ -59,6 +64,7 @@ class Bolinha {
                 this.vx = -this.vx * this.elasticidade;
             }
 
+            // verifica colisão com as laterais (vertical)
             if ( this.y - this.raio < 0 ) {
                 this.y = this.raio;
                 this.vy = -this.vy * this.elasticidade;
@@ -67,29 +73,37 @@ class Bolinha {
                 this.vy = -this.vy * this.elasticidade;
             }
 
+            // recalcula a velocidade
             this.vx = this.vx * this.atrito;
-            this.vy = this.vy * this.atrito + GRAVIDADE * delta;
+            this.vy = this.vy * this.atrito + GRAVIDADE;
 
         } else {
+            
+            // calcula a nova velocidade da bolinha enquanto a arrasta
             this.x = mouseX - this.diffX;
             this.y = mouseY - this.diffY;
+            
             this.vx = ( this.x - this.prevX ) / delta;
             this.vy = ( this.y - this.prevY ) / delta;
+            
             this.prevX = this.x;
             this.prevY = this.y;
+            
         }
 
     }
 
+    // desenha a bolinha, passando o contexto gráfico
     desenhar( ctx ) {
-        ctx.save();
+        ctx.save();  // salva o estado do contexto gráfico
         ctx.fillStyle = this.cor;
         ctx.beginPath();
         ctx.arc( this.x, this.y, this.raio, 0, 2 * Math.PI ); // desenho do círculo
         ctx.fill();
-        ctx.restore();
+        ctx.restore();  // recupera o estado salvo do contexto gráfico
     }
 
+    // retorna se a bolinha foi interceptada pela coordenada x e y
     intercepta( x, y ) {
         let c1 = this.x - x;
         let c2 = this.y - y;
@@ -98,24 +112,40 @@ class Bolinha {
 
 }
 
+// inicia o módulo
 function iniciar() {
-
+    
+    // obtém o canvas e o contexto gráfico 2D
     const canvas = document.getElementById( "canvas" );
     ctx = canvas.getContext( "2d" );
 
+    // obtém a largura e a altura do canvas
     largura = canvas.width;
     altura = canvas.height;
+    
+    // cria a primeira bolinha e insere no array
+    bolinhas.push( new Bolinha(
+        largura / 2,
+        altura / 2,
+        25,
+        200,
+        200,
+        "#000000"
+    ));
 
-    bolinhas.push( new Bolinha( largura / 2, altura / 2, 25, 200, 200, "#000000" ) );
-
+    // interação com o usuário
+    
+    // cancela o comportamento padrão do menu de contexto
     canvas.addEventListener( "contextmenu", event => {
         event.preventDefault();
     });
 
+    // quando o mouse foi pressionado no canvas
     canvas.addEventListener( "mousedown", event => {
         
         event.preventDefault();
 
+        // botão da esquerda
         if ( event.button === 0 ) {
             for ( let i = bolinhas.length - 1; i >= 0; i-- ) {
                 const bolinha = bolinhas[i];
@@ -127,19 +157,20 @@ function iniciar() {
                     break;
                 }
             }
-        } else if ( event.button === 1 ) {
+        } else if ( event.button === 1 ) {   // botão do meio
             for ( let i = 0; i < bolinhas.length; i++ ) {
                 const bolinha = bolinhas[i];
                 bolinha.vx = gerarVelocidadeAleatoria( -1000, 1000 );
                 bolinha.vy = gerarVelocidadeAleatoria( -1000, 1000 );
             }
-        } else if ( event.button === 2 ) {
+        } else if ( event.button === 2 ) {   // botão direito
             criarBolinha( event.offsetX, event.offsetY );
             isMouseDown = true;
         }
 
     });
-
+    
+    // quando o mouse foi solto no canvas
     canvas.addEventListener( "mouseup", event => {
         if ( event.button === 0 ) {
             if ( bolinhaSelecionada !== null ) {
@@ -149,7 +180,8 @@ function iniciar() {
             isMouseDown = false;
         }
     });
-
+    
+    // quando o mouse se moveu dentro do canvas
     canvas.addEventListener( "mousemove", event => {
         mouseX = event.offsetX;
         mouseY = event.offsetY;
@@ -158,12 +190,15 @@ function iniciar() {
         }
     });
 
+    // quando o mouse saiu do canvas
     canvas.addEventListener( "mouseout", event => {
         if ( bolinhaSelecionada !== null ) {
             bolinhaSelecionada.emArraste = false;
+            bolinhaSelecionada = null;
         }
     });
 
+    // inicia a animação
     requestAnimationFrame( executar );
 
 }
@@ -171,23 +206,27 @@ function iniciar() {
 
 function executar( tempoAtual ) {
 
-    // tempo em milisegundos!
+    // os tempos estão em milisegundos
+    // convertendo para segundos para usar na função
     delta = ( tempoAtual - ultimoTempo ) / 1000.0;
     ultimoTempo = tempoAtual;
 
     atualizar( delta );
     desenhar( ctx );
 
+    // executa o próximo quadro
     requestAnimationFrame( executar );
     
 }
 
+// atualiza a simulação
 function atualizar( delta ) {
     for ( let i = 0; i < bolinhas.length; i++ ) {
         bolinhas[i].atualizar( delta );
     }
 }
 
+// desenha a simulação
 function desenhar( ctx ) {
 
     ctx.clearRect( 0, 0, largura, altura );
@@ -202,6 +241,7 @@ function desenhar( ctx ) {
 
 }
 
+// cria uma nova bolinha com cor aleatória
 function criarBolinha( x, y ) {
 
     const r = Math.random() * 256;
@@ -220,8 +260,11 @@ function criarBolinha( x, y ) {
     );
 }
 
+
+// gera uma velocidade aleatória
 function gerarVelocidadeAleatoria( minima, maxima ) {
     return minima + Math.random() * Math.abs( maxima - minima );
 }
 
+// inicia o módulo
 iniciar();
