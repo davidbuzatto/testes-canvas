@@ -37,7 +37,7 @@ class Bolinha {
 
     }
 
-    atualizar( largura, altura, delta ) {
+    atualizar( delta ) {
 
         if ( !this.emArraste ) {
 
@@ -179,7 +179,7 @@ function executar( tempoAtual ) {
 
 function atualizar( delta ) {
     for ( let i = 0; i < bolinhas.length; i++ ) {
-        bolinhas[i].atualizar( largura, altura, delta );
+        bolinhas[i].atualizar( delta );
     }
 }
 
