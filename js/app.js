@@ -83,7 +83,7 @@ class Bolinha {
         ctx.restore();
     }
 
-    intersepta( x, y ) {
+    intercepta( x, y ) {
         let c1 = this.x - x;
         let c2 = this.y - y;
         return c1 * c1 + c2 * c2 <= this.raio * this.raio;
@@ -114,7 +114,7 @@ function preparar() {
         if ( event.button === 0 ) {
             for ( let i = bolinhas.length - 1; i >= 0; i-- ) {
                 const bolinha = bolinhas[i];
-                if ( bolinha.intersepta( event.offsetX, event.offsetY ) ) {
+                if ( bolinha.intercepta( event.offsetX, event.offsetY ) ) {
                     bolinha.emArraste = true;
                     bolinha.diffX = event.offsetX - bolinha.x;
                     bolinha.diffY = event.offsetY - bolinha.y;
