@@ -1,3 +1,5 @@
+// variáveis globais do módulo
+
 const GRAVIDADE = 1200;
 
 let ctx;
@@ -9,7 +11,7 @@ let bolinhaSelecionada;
 let largura;
 let altura;
 
-let mouseDown = false;
+let isMouseDown = false;
 let mouseX;
 let mouseY;
 
@@ -30,13 +32,18 @@ class Bolinha {
         this.elasticidade = 0.9;
 
         this.emArraste = false;
+        
+        // diferença em x e y para ajustar o "segurar" a bolinha
         this.diffX = 0;
         this.diffY = 0;
+        
+        // x e y anteriors para recálculo da velocidade
         this.prevX;
         this.prevY;
 
     }
 
+    // delta é a variação do tempo em segundos entre um quadro e outro
     atualizar( delta ) {
 
         if ( !this.emArraste ) {
@@ -78,7 +85,7 @@ class Bolinha {
         ctx.save();
         ctx.fillStyle = this.cor;
         ctx.beginPath();
-        ctx.arc( this.x, this.y, this.raio, 0, 2 * Math.PI );
+        ctx.arc( this.x, this.y, this.raio, 0, 2 * Math.PI ); // desenho do círculo
         ctx.fill();
         ctx.restore();
     }
@@ -91,9 +98,7 @@ class Bolinha {
 
 }
 
-
-
-function preparar() {
+function iniciar() {
 
     const canvas = document.getElementById( "canvas" );
     ctx = canvas.getContext( "2d" );
@@ -125,12 +130,12 @@ function preparar() {
         } else if ( event.button === 1 ) {
             for ( let i = 0; i < bolinhas.length; i++ ) {
                 const bolinha = bolinhas[i];
-                bolinha.vx = gerarVelocidadeAleatoria( 400, 1000 );
-                bolinha.vy = gerarVelocidadeAleatoria( 400, 1000 );
+                bolinha.vx = gerarVelocidadeAleatoria( -1000, 1000 );
+                bolinha.vy = gerarVelocidadeAleatoria( -1000, 1000 );
             }
         } else if ( event.button === 2 ) {
             criarBolinha( event.offsetX, event.offsetY );
-            mouseDown = true;
+            isMouseDown = true;
         }
 
     });
@@ -141,14 +146,14 @@ function preparar() {
                 bolinhaSelecionada.emArraste = false;
             }
         } else if ( event.button === 2 ) {
-            mouseDown = false;
+            isMouseDown = false;
         }
     });
 
     canvas.addEventListener( "mousemove", event => {
         mouseX = event.offsetX;
         mouseY = event.offsetY;
-        if ( mouseDown ) {
+        if ( isMouseDown ) {
             criarBolinha( event.offsetX, event.offsetY );
         }
     });
@@ -208,15 +213,15 @@ function criarBolinha( x, y ) {
             x,
             y,
             6 + Math.random() * 15,
-            gerarVelocidadeAleatoria( 50, 400 ),
-            gerarVelocidadeAleatoria( 50, 400 ),
+            gerarVelocidadeAleatoria( -500, 500 ),
+            gerarVelocidadeAleatoria( -500, 500 ),
             `rgb(${r},${g},${b})`
         )
     );
 }
 
 function gerarVelocidadeAleatoria( minima, maxima ) {
-    return ( minima + Math.random() * ( maxima - minima ) ) * ( Math.random() < 0.5 ? -1 : 1 );
+    return minima + Math.random() * Math.abs( maxima - minima );
 }
 
-preparar();
+iniciar();
